@@ -1,9 +1,10 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext } from 'react';
 import AppContext from '../context/AppContext';
 
 export default function Table() {
-  const { apiData } = useContext(AppContext);
-  const [inputText, setInputText] = useState('');
+  const { apiData, inputText, setInputText, columnFilter, setColumnFilter,
+    comparisonFilter, setComparisonFilter, number, setNumber,
+    handleFilter } = useContext(AppContext);
 
   return (
     <div className="divmaster">
@@ -15,6 +16,55 @@ export default function Table() {
         value={ inputText }
         onChange={ ({ target }) => setInputText(target.value) }
       />
+
+      <label htmlFor="">
+        Coluna:
+        <select
+          name="columnFilter"
+          id="columnFilter"
+          data-testid="column-filter"
+          defaultValue={ columnFilter }
+          onChange={ ({ target }) => setColumnFilter(target.value) }
+        >
+          <option value="population">population</option>
+          <option value="orbital_period">orbital_period</option>
+          <option value="diameter">diameter</option>
+          <option value="rotation_period">rotation_period</option>
+          <option value="surface_water">surface_water</option>
+        </select>
+      </label>
+      <label htmlFor="">
+        Operador:
+        <select
+          name="comparisonFilter"
+          id="comparisonFilter"
+          data-testid="comparison-filter"
+          defaultValue={ comparisonFilter }
+          onChange={ ({ target }) => setComparisonFilter(target.value) }
+        >
+          <option value="maior que">maior que</option>
+          <option value="menor que">menor que</option>
+          <option value="igual a">igual a</option>
+        </select>
+      </label>
+      <label htmlFor="">
+        <input
+          type="number"
+          name="valueFilter"
+          id="valueFilter"
+          data-testid="value-filter"
+          min="0"
+          defaultValue={ number }
+          onChange={ ({ target }) => setNumber(target.value) }
+        />
+      </label>
+      <button
+        type="button"
+        data-testid="button-filter"
+        onClick={ handleFilter }
+      >
+        Filtrar
+      </button>
       <table className="table">
         <thead className="head">
           <tr className="tr">
@@ -68,22 +118,6 @@ export default function Table() {
                 <td>{ dataElements.url }</td>
               </tr>
             ))}
-          {/* {apiData.filter((e) => (e.name.includes(inputText))).map((e) => (
-            <tr
-              className="tr"
-              key={ e.id }
-            >
-              <td className="td">{ e.name }</td>
-              <td>{e.rotationPeriod}</td>
-              <td>{e.orbitalPeriod}</td>
-              <td>{e.diameter}</td>
-              <td>{e.climate}</td>
-              <td>
-                {e.alternate_names.map((w, index) => <span key={ index }>{w}</span>)}
-
-              </td>
-              <td>{e.image}</td>
-            </tr>))} */}
         </tbody>
       </table>
     </div>
