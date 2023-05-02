@@ -1,11 +1,20 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import AppContext from '../context/AppContext';
 
 export default function Table() {
   const { apiData } = useContext(AppContext);
+  const [inputText, setInputText] = useState('');
 
   return (
     <div className="divmaster">
+      <input
+        type="text"
+        name="inputText"
+        id="inputText"
+        data-testid="name-filter"
+        value={ inputText }
+        onChange={ ({ target }) => setInputText(target.value) }
+      />
       <table className="table">
         <thead className="head">
           <tr className="tr">
@@ -37,27 +46,28 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          { apiData.map((dataElements) => (
-            <tr
-              className="rs"
-              key={ dataElements.name }
-            >
-              <td>{ dataElements.name }</td>
-              <td>{ dataElements.rotation_period }</td>
-              <td>{ dataElements.orbital_period }</td>
-              <td>{ dataElements.diameter }</td>
-              <td>{ dataElements.climate }</td>
-              <td>{ dataElements.gravity }</td>
-              <td>{ dataElements.terrain }</td>
-              <td>{ dataElements.surface_water }</td>
-              <td>{ dataElements.population }</td>
-              <td>{ dataElements.residents }</td>
-              <td>{ dataElements.films }</td>
-              <td>{ dataElements.created }</td>
-              <td>{ dataElements.edited }</td>
-              <td>{ dataElements.url }</td>
-            </tr>
-          ))}
+          { apiData.filter((dataElements) => (dataElements.name.includes(inputText)))
+            .map((dataElements) => (
+              <tr
+                className="rs"
+                key={ dataElements.name }
+              >
+                <td>{ dataElements.name }</td>
+                <td>{ dataElements.rotation_period }</td>
+                <td>{ dataElements.orbital_period }</td>
+                <td>{ dataElements.diameter }</td>
+                <td>{ dataElements.climate }</td>
+                <td>{ dataElements.gravity }</td>
+                <td>{ dataElements.terrain }</td>
+                <td>{ dataElements.surface_water }</td>
+                <td>{ dataElements.population }</td>
+                <td>{ dataElements.residents }</td>
+                <td>{ dataElements.films }</td>
+                <td>{ dataElements.created }</td>
+                <td>{ dataElements.edited }</td>
+                <td>{ dataElements.url }</td>
+              </tr>
+            ))}
           {/* {apiData.filter((e) => (e.name.includes(inputText))).map((e) => (
             <tr
               className="tr"
