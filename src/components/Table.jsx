@@ -33,7 +33,7 @@ export default function Table() {
           <option value="surface_water">surface_water</option>
         </select>
       </label>
-      <label htmlFor="">
+      <label htmlFor="comparisonFilter">
         Operador:
         <select
           name="comparisonFilter"
