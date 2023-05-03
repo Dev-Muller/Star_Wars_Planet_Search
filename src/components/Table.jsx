@@ -2,12 +2,12 @@ import React, { useContext } from 'react';
 import AppContext from '../context/AppContext';
 
 export default function Table() {
-  const { apiData, inputText, setInputText, columnFilter, setColumnFilter,
-    comparisonFilter, setComparisonFilter, number, setNumber,
-    handleFilter } = useContext(AppContext);
+  const { apiData, inputText, setInputText, columnFilter,
+    handleFilter, filters, objFilter, setObjFilter } = useContext(AppContext);
 
+  console.log(filters);
   return (
-    <div className="divmaster">
+    <section>
       <input
         type="text"
         name="inputText"
@@ -16,31 +16,32 @@ export default function Table() {
         value={ inputText }
         onChange={ ({ target }) => setInputText(target.value) }
       />
-
       <label htmlFor="">
         Coluna:
         <select
-          name="columnFilter"
+          name="column"
           id="columnFilter"
           data-testid="column-filter"
-          defaultValue={ columnFilter }
-          onChange={ ({ target }) => setColumnFilter(target.value) }
+          onChange={ ({ target }) => setObjFilter({
+            ...objFilter,
+            [target.name]: target.value,
+          }) }
         >
-          <option value="population">population</option>
-          <option value="orbital_period">orbital_period</option>
-          <option value="diameter">diameter</option>
-          <option value="rotation_period">rotation_period</option>
-          <option value="surface_water">surface_water</option>
+          { columnFilter.map((item, index) => (
+            <option key={ index } value={ item }>{ item }</option>
+          ))}
         </select>
       </label>
       <label htmlFor="comparisonFilter">
         Operador:
         <select
-          name="comparisonFilter"
+          name="comparison"
           id="comparisonFilter"
           data-testid="comparison-filter"
-          defaultValue={ comparisonFilter }
-          onChange={ ({ target }) => setComparisonFilter(target.value) }
+          onChange={ ({ target }) => setObjFilter({
+            ...objFilter,
+            [target.name]: target.value,
+          }) }
         >
           <option value="maior que">maior que</option>
           <option value="menor que">menor que</option>
@@ -50,12 +51,15 @@ export default function Table() {
       <label htmlFor="">
         <input
           type="number"
-          name="valueFilter"
+          name="value"
           id="valueFilter"
           data-testid="value-filter"
           min="0"
-          defaultValue={ number }
-          onChange={ ({ target }) => setNumber(target.value) }
+          // defaultValue={ number }
+          onChange={ ({ target }) => setObjFilter({
+            ...objFilter,
+            [target.name]: target.value,
+          }) }
         />
       </label>
       <button
@@ -65,6 +69,20 @@ export default function Table() {
       >
         Filtrar
       </button>
+      { filters.map((item, index) => (
+        <>
+          <span
+            key={ `${item} ${index}` }
+          >
+            {`${item.column} ${item.comparison} ${item.value}`}
+          </span>
+          <button
+            type="button"
+          >
+            remove
+          </button>
+        </>
+      )) }
       <table className="table">
         <thead className="head">
           <tr className="tr">
@@ -120,6 +138,6 @@ export default function Table() {
             ))}
         </tbody>
       </table>
-    </div>
+    </section>
   );
 }

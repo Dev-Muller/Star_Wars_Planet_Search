@@ -2,14 +2,20 @@ import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import AppContext from './AppContext';
 
-const fields = 'population';
+const fields = ['population',
+  'orbital_period', 'diameter', 'rotation_period', 'surface_water'];
 function AppProvider({ children }) {
   const [apiData, setData] = useState([]);
   const [inputText, setInputText] = useState('');
   const [columnFilter, setColumnFilter] = useState(fields);
-  const [comparisonFilter, setComparisonFilter] = useState('maior que');
-  const [number, setNumber] = useState(0);
+  // const [comparisonFilter, setComparisonFilter] = useState('maior que');
+  // const [number, setNumber] = useState(0);
   const [filters, setFilters] = useState([]);
+  const [objFilter, setObjFilter] = useState({
+    column: 'population',
+    comparison: 'maior que',
+    value: 0,
+  });
 
   useEffect(() => {
     const requestApi = async () => {
@@ -21,34 +27,52 @@ function AppProvider({ children }) {
   }, []);
 
   const saveFiltersBigger = useCallback(() => {
+    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[columnFilter]) > Number(number)
+      Number(element[column]) > Number(value)
     ));
     setData(filtered);
     setFilters([...filters,
-      { columnFilter, comparisonFilter, number }]);
-  }, [columnFilter, comparisonFilter, number, filters, apiData]);
+      { column,
+        comparison,
+        value,
+      }]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
+    setObjFilter(objFilter.column[0]);
+  }, [objFilter, columnFilter, filters, apiData]);
 
   const saveFiltersLower = useCallback(() => {
+    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[columnFilter]) < Number(number)
+      Number(element[column]) < Number(value)
     ));
     setData(filtered);
     setFilters([...filters,
-      { columnFilter, comparisonFilter, number }]);
-  }, [columnFilter, comparisonFilter, number, filters, apiData]);
+      { column,
+        comparison,
+        value,
+      }]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
+    setObjFilter(objFilter.column[0]);
+  }, [objFilter, columnFilter, filters, apiData]);
 
   const saveFiltersEqual = useCallback(() => {
+    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[columnFilter]) === Number(number)
+      Number(element[column]) === Number(value)
     ));
     setData(filtered);
     setFilters([...filters,
-      { columnFilter, comparisonFilter, number }]);
-  }, [columnFilter, comparisonFilter, number, filters, apiData]);
+      { column,
+        comparison,
+        value,
+      }]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
+    setObjFilter(objFilter.column[0]);
+  }, [objFilter, columnFilter, filters, apiData]);
 
   const handleFilter = useCallback(() => {
-    switch (comparisonFilter) {
+    switch (objFilter.comparison) {
     case 'maior que':
       return saveFiltersBigger();
     case 'menor que':
@@ -58,7 +82,7 @@ function AppProvider({ children }) {
     default:
       return apiData;
     }
-  }, [apiData, comparisonFilter, saveFiltersBigger, saveFiltersEqual, saveFiltersLower]);
+  }, [apiData, objFilter, saveFiltersBigger, saveFiltersEqual, saveFiltersLower]);
 
   const context = useMemo(() => ({
     apiData,
@@ -66,16 +90,16 @@ function AppProvider({ children }) {
     setInputText,
     columnFilter,
     setColumnFilter,
-    comparisonFilter,
-    setComparisonFilter,
-    number,
-    setNumber,
+    // comparisonFilter,
+    // setComparisonFilter,
+    // number,
+    // setNumber,
     filters,
     handleFilter,
-  }), [apiData, inputText, setInputText, columnFilter, setColumnFilter, comparisonFilter,
-    setComparisonFilter,
-    number,
-    setNumber, filters, handleFilter]);
+    objFilter,
+    setObjFilter,
+  }), [apiData, inputText, setInputText, filters, handleFilter, objFilter, setObjFilter,
+    columnFilter]);
 
   return (
     <AppContext.Provider value={ context }>
