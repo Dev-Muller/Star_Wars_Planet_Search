@@ -53,9 +53,9 @@ export default function Table() {
           type="number"
           name="value"
           id="valueFilter"
+          defaultValue={ objFilter.value }
           data-testid="value-filter"
           min="0"
-          // defaultValue={ number }
           onChange={ ({ target }) => setObjFilter({
             ...objFilter,
             [target.name]: target.value,
