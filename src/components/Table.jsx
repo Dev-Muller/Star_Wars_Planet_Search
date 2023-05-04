@@ -76,7 +76,7 @@ export default function Table() {
         )
       }
 
-      { filteredColumn.map((item, index) => (
+      { filters.map((item, index) => (
         <span
           key={ index }
           data-testid="filter"
