@@ -3,9 +3,11 @@ import AppContext from '../context/AppContext';
 
 export default function Table() {
   const { apiData, inputText, setInputText, columnFilter,
-    handleFilter, filters, objFilter, setObjFilter } = useContext(AppContext);
+    handleFilter, filters, handleDeleteAllFilters, handleDeleteOneFilter,
+    selectField, setSelectField, comparisonField, setComparisonField,
+    number, setNumber } = useContext(AppContext);
 
-  console.log(filters);
+  // console.log(filters);
   return (
     <section>
       <input
@@ -22,10 +24,8 @@ export default function Table() {
           name="column"
           id="columnFilter"
           data-testid="column-filter"
-          onChange={ ({ target }) => setObjFilter({
-            ...objFilter,
-            [target.name]: target.value,
-          }) }
+          value={ selectField }
+          onChange={ ({ target }) => setSelectField(target.value) }
         >
           { columnFilter.map((item, index) => (
             <option key={ index } value={ item }>{ item }</option>
@@ -37,11 +37,9 @@ export default function Table() {
         <select
           name="comparison"
           id="comparisonFilter"
+          value={ comparisonField }
           data-testid="comparison-filter"
-          onChange={ ({ target }) => setObjFilter({
-            ...objFilter,
-            [target.name]: target.value,
-          }) }
+          onChange={ ({ target }) => setComparisonField(target.value) }
         >
           <option value="maior que">maior que</option>
           <option value="menor que">menor que</option>
@@ -53,13 +51,10 @@ export default function Table() {
           type="number"
           name="value"
           id="valueFilter"
-          defaultValue={ objFilter.value }
+          value={ number }
           data-testid="value-filter"
           min="0"
-          onChange={ ({ target }) => setObjFilter({
-            ...objFilter,
-            [target.name]: target.value,
-          }) }
+          onChange={ ({ target }) => setNumber(target.value) }
         />
       </label>
       <button
@@ -69,19 +64,31 @@ export default function Table() {
       >
         Filtrar
       </button>
-      { filters.map((item, index) => (
-        <>
-          <span
-            key={ `${item} ${index}` }
-          >
-            {`${item.column} ${item.comparison} ${item.value}`}
-          </span>
+      {
+        filters.length > 0 && (
           <button
             type="button"
+            data-testid="button-remove-filters"
+            onClick={ handleDeleteAllFilters }
           >
-            remove
+            Remover todas filtragens
           </button>
-        </>
+        )
+      }
+
+      { filteredColumn.map((item, index) => (
+        <span
+          key={ index }
+          data-testid="filter"
+        >
+          {`${item.selectField} ${item.comparisonField} ${item.number}`}
+          <button
+            type="button"
+            onClick={ () => handleDeleteOneFilter(item) }
+          >
+            x
+          </button>
+        </span>
       )) }
       <table className="table">
         <thead className="head">

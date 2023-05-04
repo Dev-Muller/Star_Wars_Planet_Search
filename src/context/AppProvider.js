@@ -8,71 +8,54 @@ function AppProvider({ children }) {
   const [apiData, setData] = useState([]);
   const [inputText, setInputText] = useState('');
   const [columnFilter, setColumnFilter] = useState(fields);
-  // const [comparisonFilter, setComparisonFilter] = useState('maior que');
-  // const [number, setNumber] = useState(0);
+  const [selectField, setSelectField] = useState(fields[0]);
+  const [comparisonField, setComparisonField] = useState('maior que');
+  const [number, setNumber] = useState(0);
+  const [initialStateApi, setInitialStateApi] = useState([]);
   const [filters, setFilters] = useState([]);
-  const [objFilter, setObjFilter] = useState({
-    column: 'population',
-    comparison: 'maior que',
-    value: 0,
-  });
 
+  const requestApi = async () => {
+    const response = await fetch('https://swapi.dev/api/planets');
+    const result = await response.json();
+    setData(result.results);
+    setInitialStateApi(result.results);
+  };
   useEffect(() => {
-    const requestApi = async () => {
-      const response = await fetch('https://swapi.dev/api/planets');
-      const result = await response.json();
-      setData(result.results);
-    };
     requestApi();
   }, []);
 
   const saveFiltersBigger = useCallback(() => {
-    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[column]) > Number(value)
+      Number(element[selectField]) > Number(number)
     ));
     setData(filtered);
-    setFilters([...filters,
-      { column,
-        comparison,
-        value,
-      }]);
-    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
-    setObjFilter(objFilter.column[0]);
-  }, [objFilter, columnFilter, filters, apiData]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
+    setSelectField(columnFilter[1]);
+    setFilters([...filters, { selectField, comparisonField, number }]);
+  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
 
   const saveFiltersLower = useCallback(() => {
-    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[column]) < Number(value)
+      Number(element[selectField]) < Number(number)
     ));
     setData(filtered);
-    setFilters([...filters,
-      { column,
-        comparison,
-        value,
-      }]);
-    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
-    setObjFilter(objFilter.column[0]);
-  }, [objFilter, columnFilter, filters, apiData]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
+    setSelectField(columnFilter[1]);
+    setFilters([...filters, { selectField, comparisonField, number }]);
+  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
 
   const saveFiltersEqual = useCallback(() => {
-    const { column, comparison, value } = objFilter;
     const filtered = apiData.filter((element) => (
-      Number(element[column]) === Number(value)
+      Number(element[selectField]) === Number(number)
     ));
     setData(filtered);
-    setFilters([...filters,
-      { column,
-        comparison,
-        value,
-      }]);
-    setColumnFilter(columnFilter.filter((filt) => filt !== objFilter.column));
-    setObjFilter(objFilter.column[0]);
-  }, [objFilter, columnFilter, filters, apiData]);
+    setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
+    setSelectField(columnFilter[1]);
+    setFilters([...filters, { selectField, comparisonField, number }]);
+  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
 
   const handleFilter = useCallback(() => {
-    switch (objFilter.comparison) {
+    switch (comparisonField) {
     case 'maior que':
       return saveFiltersBigger();
     case 'menor que':
@@ -82,7 +65,53 @@ function AppProvider({ children }) {
     default:
       return apiData;
     }
-  }, [apiData, objFilter, saveFiltersBigger, saveFiltersEqual, saveFiltersLower]);
+  }, [apiData, saveFiltersBigger, saveFiltersLower, saveFiltersEqual, comparisonField]);
+
+  // const mapColumns = filters.map((item) => item.columnFilter);
+
+  // const filteredColumn = fields.filter((item) => !mapColumns.includes(item));
+
+  const handleDeleteOneFilter = useCallback((item) => {
+    const diferentFilter = filters.filter((element) => element !== item);
+    setFilters(diferentFilter);
+    diferentFilter.forEach((element) => {
+      console.log(element);
+      if (element.comparisonField === 'maior que') {
+        const filtered = initialStateApi.filter((elementos) => (
+          Number(elementos[selectField]) > Number(number)
+        ));
+        setData(filtered);
+        setColumnFilter(...columnFilter, element.selectField);
+        console.log(filtered);
+      } else if (element.comparisonField === 'menor que') {
+        const filtered = initialStateApi.filter((elementos) => (
+          Number(elementos[selectField]) < Number(number)
+        ));
+        setData(filtered);
+        setColumnFilter(...columnFilter, element.selectField);
+        console.log(filtered);
+      } else if (element.comparisonField === 'igual a') {
+        const filtered = initialStateApi.filter((elementos) => (
+          Number(elementos[selectField]) === Number(number)
+        ));
+        setData(filtered);
+        setColumnFilter(...columnFilter, item.selectField);
+        console.log(filtered);
+      } else {
+        return apiData;
+      }
+    });
+  }, [filters, apiData, columnFilter, initialStateApi, number, selectField]);
+
+  const handleDeleteAllFilters = useCallback(() => {
+    setData([]);
+    setFilters([]);
+    setColumnFilter(fields);
+    setSelectField(fields[0]);
+    setComparisonField('maior que');
+    setNumber(0);
+    requestApi();
+  }, []);
 
   const context = useMemo(() => ({
     apiData,
@@ -90,16 +119,21 @@ function AppProvider({ children }) {
     setInputText,
     columnFilter,
     setColumnFilter,
-    // comparisonFilter,
-    // setComparisonFilter,
-    // number,
-    // setNumber,
+    selectField,
+    setSelectField,
+    comparisonField,
+    setComparisonField,
+    number,
+    setNumber,
     filters,
     handleFilter,
-    objFilter,
-    setObjFilter,
-  }), [apiData, inputText, setInputText, filters, handleFilter, objFilter, setObjFilter,
-    columnFilter]);
+    initialStateApi,
+    setInitialStateApi,
+    handleDeleteAllFilters,
+    handleDeleteOneFilter,
+  }), [apiData, inputText, filters, handleFilter, selectField, comparisonField,
+    number, columnFilter, initialStateApi,
+    handleDeleteAllFilters, handleDeleteOneFilter]);
 
   return (
     <AppContext.Provider value={ context }>
