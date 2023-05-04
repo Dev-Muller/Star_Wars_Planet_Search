@@ -5,7 +5,7 @@ import AppContext from './AppContext';
 const fields = ['population',
   'orbital_period', 'diameter', 'rotation_period', 'surface_water'];
 function AppProvider({ children }) {
-  const [apiData, setData] = useState([]);
+  const [data, setData] = useState([]);
   const [inputText, setInputText] = useState('');
   const [columnFilter, setColumnFilter] = useState(fields);
   const [selectField, setSelectField] = useState(fields[0]);
@@ -25,34 +25,34 @@ function AppProvider({ children }) {
   }, []);
 
   const saveFiltersBigger = useCallback(() => {
-    const filtered = apiData.filter((element) => (
+    const filtered = data.filter((element) => (
       Number(element[selectField]) > Number(number)
     ));
     setData(filtered);
     setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
     setSelectField(columnFilter[1]);
     setFilters([...filters, { selectField, comparisonField, number }]);
-  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
+  }, [columnFilter, filters, data, selectField, comparisonField, number]);
 
   const saveFiltersLower = useCallback(() => {
-    const filtered = apiData.filter((element) => (
+    const filtered = data.filter((element) => (
       Number(element[selectField]) < Number(number)
     ));
     setData(filtered);
     setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
     setSelectField(columnFilter[1]);
     setFilters([...filters, { selectField, comparisonField, number }]);
-  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
+  }, [columnFilter, filters, data, selectField, comparisonField, number]);
 
   const saveFiltersEqual = useCallback(() => {
-    const filtered = apiData.filter((element) => (
+    const filtered = data.filter((element) => (
       Number(element[selectField]) === Number(number)
     ));
     setData(filtered);
     setColumnFilter(columnFilter.filter((filt) => filt !== selectField));
     setSelectField(columnFilter[1]);
     setFilters([...filters, { selectField, comparisonField, number }]);
-  }, [columnFilter, filters, apiData, selectField, comparisonField, number]);
+  }, [columnFilter, filters, data, selectField, comparisonField, number]);
 
   const handleFilter = useCallback(() => {
     switch (comparisonField) {
@@ -63,45 +63,31 @@ function AppProvider({ children }) {
     case 'igual a':
       return saveFiltersEqual();
     default:
-      return apiData;
+      return data;
     }
-  }, [apiData, saveFiltersBigger, saveFiltersLower, saveFiltersEqual, comparisonField]);
-
-  // const mapColumns = filters.map((item) => item.columnFilter);
-
-  // const filteredColumn = fields.filter((item) => !mapColumns.includes(item));
+  }, [data, saveFiltersBigger, saveFiltersLower, saveFiltersEqual, comparisonField]);
 
   const handleDeleteOneFilter = useCallback((item) => {
-    const diferentFilter = filters.filter((element) => element !== item);
-    setFilters(diferentFilter);
+    let newData = [...initialStateApi];
+    const diferentFilter = filters.filter((element) => element.selectField !== item);
     diferentFilter.forEach((element) => {
-      console.log(element);
-      if (element.comparisonField === 'maior que') {
-        const filtered = initialStateApi.filter((elementos) => (
-          Number(elementos[selectField]) > Number(number)
-        ));
-        setData(filtered);
-        setColumnFilter(...columnFilter, element.selectField);
-        console.log(filtered);
-      } else if (element.comparisonField === 'menor que') {
-        const filtered = initialStateApi.filter((elementos) => (
-          Number(elementos[selectField]) < Number(number)
-        ));
-        setData(filtered);
-        setColumnFilter(...columnFilter, element.selectField);
-        console.log(filtered);
-      } else if (element.comparisonField === 'igual a') {
-        const filtered = initialStateApi.filter((elementos) => (
-          Number(elementos[selectField]) === Number(number)
-        ));
-        setData(filtered);
-        setColumnFilter(...columnFilter, item.selectField);
-        console.log(filtered);
-      } else {
-        return apiData;
-      }
+      newData = newData.filter((planet) => {
+        if (element.comparisonField === 'maior que') {
+          return Number(planet[element.selectField]) > Number(element.number);
+        }
+        if (element.comparisonField === 'menor que') {
+          return Number(planet[element.selectField]) < Number(element.number);
+        }
+        if (element.comparisonField === 'igual a') {
+          return Number(planet[element.selectField]) === Number(element.number);
+        }
+        return true;
+      });
     });
-  }, [filters, apiData, columnFilter, initialStateApi, number, selectField]);
+    setData([...newData]);
+    setFilters([...diferentFilter]);
+    setColumnFilter([...columnFilter, item]);
+  }, [filters, initialStateApi, columnFilter]);
 
   const handleDeleteAllFilters = useCallback(() => {
     setData([]);
@@ -114,7 +100,7 @@ function AppProvider({ children }) {
   }, []);
 
   const context = useMemo(() => ({
-    apiData,
+    data,
     inputText,
     setInputText,
     columnFilter,
@@ -131,7 +117,7 @@ function AppProvider({ children }) {
     setInitialStateApi,
     handleDeleteAllFilters,
     handleDeleteOneFilter,
-  }), [apiData, inputText, filters, handleFilter, selectField, comparisonField,
+  }), [data, inputText, filters, handleFilter, selectField, comparisonField,
     number, columnFilter, initialStateApi,
     handleDeleteAllFilters, handleDeleteOneFilter]);
 

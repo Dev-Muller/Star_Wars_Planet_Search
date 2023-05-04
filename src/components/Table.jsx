@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import AppContext from '../context/AppContext';
 
 export default function Table() {
-  const { apiData, inputText, setInputText, columnFilter,
+  const { data, inputText, setInputText, columnFilter,
     handleFilter, filters, handleDeleteAllFilters, handleDeleteOneFilter,
     selectField, setSelectField, comparisonField, setComparisonField,
     number, setNumber } = useContext(AppContext);
@@ -84,7 +84,7 @@ export default function Table() {
           {`${item.selectField} ${item.comparisonField} ${item.number}`}
           <button
             type="button"
-            onClick={ () => handleDeleteOneFilter(item) }
+            onClick={ () => handleDeleteOneFilter(item.selectField) }
           >
             x
           </button>
@@ -121,7 +121,7 @@ export default function Table() {
           </tr>
         </thead>
         <tbody>
-          { apiData.filter((dataElements) => (dataElements.name.includes(inputText)))
+          { data.filter((dataElements) => (dataElements.name.includes(inputText)))
             .map((dataElements) => (
               <tr
                 className="rs"
