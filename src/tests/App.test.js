@@ -1,14 +1,22 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import App from '../App';
+import mockData from './helpers/mockData';
 
 test('Teste a página da aplicacao', () => {
-  it('Verifica se inputs e table estão presentes', ()=> {
+  beforeEach(() => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      json: () => Promise.resolve(
+        mockData,
+      ),
+    });
     render(
       <AppProvider>
         <App />
       </AppProvider>,
     );
+  });
+  it('Verifica se inputs e table estão presentes', ()=> {
     
     const textInput = screen.getByTestId('name-filter');
     const columnFilter = screen.getByTestId('column-filter');
