@@ -13,6 +13,9 @@ function AppProvider({ children }) {
   const [number, setNumber] = useState(0);
   const [initialStateApi, setInitialStateApi] = useState([]);
   const [filters, setFilters] = useState([]);
+  const [columnSort, setColumnSort] = useState(fields[0]);
+  const [sort, setSort] = useState('');
+  const [sortFilter, setSortFilter] = useState([]);
 
   const requestApi = async () => {
     const response = await fetch('https://swapi.dev/api/planets');
@@ -99,6 +102,24 @@ function AppProvider({ children }) {
     requestApi();
   }, []);
 
+  const handleSortBtn = useCallback(() => {
+    if (sort.includes('ASC')) {
+      const existe = data.filter((element) => element[columnSort] !== 'unknown');
+      const naoExiste = data.filter((element) => element[columnSort] === 'unknown');
+      const sortArr = existe.sort((a, b) => Number(a[columnSort])
+        - Number(b[columnSort]));
+      setData([...sortArr, ...naoExiste]);
+      setSortFilter([...sortFilter, { columnSort, sort }]);
+    } else if (sort.includes('DESC')) {
+      const existe = data.filter((element) => element[columnSort] !== 'unknown');
+      const naoExiste = data.filter((element) => element[columnSort] === 'unknown');
+      const sortArr = existe.sort((a, b) => Number(b[columnSort])
+        - Number(a[columnSort]));
+      setData([...sortArr, ...naoExiste]);
+      setSortFilter([...sortFilter, { columnSort, sort }]);
+    }
+  }, [columnSort, data, sortFilter, sort]);
+
   const context = useMemo(() => ({
     data,
     inputText,
@@ -117,9 +138,17 @@ function AppProvider({ children }) {
     setInitialStateApi,
     handleDeleteAllFilters,
     handleDeleteOneFilter,
+    columnSort,
+    setColumnSort,
+    sort,
+    setSort,
+    handleSortBtn,
+    sortFilter,
+    setSortFilter,
   }), [data, inputText, filters, handleFilter, selectField, comparisonField,
-    number, columnFilter, initialStateApi,
-    handleDeleteAllFilters, handleDeleteOneFilter]);
+    number, columnFilter, initialStateApi, columnSort, sort,
+    handleDeleteAllFilters, handleDeleteOneFilter, handleSortBtn,
+    sortFilter]);
 
   return (
     <AppContext.Provider value={ context }>

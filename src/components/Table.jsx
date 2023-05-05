@@ -5,9 +5,9 @@ export default function Table() {
   const { data, inputText, setInputText, columnFilter,
     handleFilter, filters, handleDeleteAllFilters, handleDeleteOneFilter,
     selectField, setSelectField, comparisonField, setComparisonField,
-    number, setNumber } = useContext(AppContext);
+    number, setNumber, columnSort, setColumnSort,
+    setSort, handleSortBtn } = useContext(AppContext);
 
-  // console.log(filters);
   return (
     <section>
       <input
@@ -75,6 +75,53 @@ export default function Table() {
           </button>
         )
       }
+      <label htmlFor="">
+        Ordenar:
+        <select
+          name="columnS"
+          id="columnSort"
+          data-testid="column-sort"
+          value={ columnSort }
+          onChange={ ({ target }) => setColumnSort(target.value) }
+        >
+          <option value="population">population</option>
+          <option value="orbital_period">orbital_period</option>
+          <option value="diameter">diameter</option>
+          <option value="rotation_period">rotation_period</option>
+          <option value="surface_water">surface_water</option>
+        </select>
+      </label>
+      <label htmlFor="">
+        Ascendente
+        <input
+          type="radio"
+          id="sortAsc"
+          name="sort"
+          value="ASC"
+          data-testid="column-sort-input-asc"
+          onChange={ ({ target }) => setSort(target.value) }
+        />
+
+      </label>
+      <label htmlFor="">
+        Descendente
+        <input
+          type="radio"
+          name="sort"
+          id="sortDesc"
+          value="DESC"
+          data-testid="column-sort-input-desc"
+          onChange={ ({ target }) => setSort(target.value) }
+        />
+
+      </label>
+      <button
+        type="button"
+        data-testid="column-sort-button"
+        onClick={ handleSortBtn }
+      >
+        ORDENAR
+      </button>
 
       { filters.map((item, index) => (
         <span
@@ -127,7 +174,7 @@ export default function Table() {
                 className="rs"
                 key={ dataElements.name }
               >
-                <td>{ dataElements.name }</td>
+                <td data-testid="planet-name">{ dataElements.name }</td>
                 <td>{ dataElements.rotation_period }</td>
                 <td>{ dataElements.orbital_period }</td>
                 <td>{ dataElements.diameter }</td>
