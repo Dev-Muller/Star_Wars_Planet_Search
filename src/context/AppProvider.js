@@ -59,32 +59,29 @@ function AppProvider({ children }) {
 
   const handleFilter = useCallback(() => {
     switch (comparisonField) {
-    case 'maior que':
-      return saveFiltersBigger();
+    // case 'maior que':
+    //   return saveFiltersBigger();
     case 'menor que':
       return saveFiltersLower();
     case 'igual a':
       return saveFiltersEqual();
     default:
-      return data;
+      return saveFiltersBigger();
     }
-  }, [data, saveFiltersBigger, saveFiltersLower, saveFiltersEqual, comparisonField]);
+  }, [saveFiltersBigger, saveFiltersLower, saveFiltersEqual, comparisonField]);
 
   const handleDeleteOneFilter = useCallback((item) => {
     let newData = [...initialStateApi];
     const diferentFilter = filters.filter((element) => element.selectField !== item);
     diferentFilter.forEach((element) => {
       newData = newData.filter((planet) => {
-        if (element.comparisonField === 'maior que') {
-          return Number(planet[element.selectField]) > Number(element.number);
-        }
         if (element.comparisonField === 'menor que') {
           return Number(planet[element.selectField]) < Number(element.number);
         }
         if (element.comparisonField === 'igual a') {
           return Number(planet[element.selectField]) === Number(element.number);
         }
-        return true;
+        return Number(planet[element.selectField]) > Number(element.number);
       });
     });
     setData([...newData]);
@@ -110,7 +107,8 @@ function AppProvider({ children }) {
         - Number(b[columnSort]));
       setData([...sortArr, ...naoExiste]);
       setSortFilter([...sortFilter, { columnSort, sort }]);
-    } else if (sort.includes('DESC')) {
+    }
+    if (sort.includes('DESC')) {
       const existe = data.filter((element) => element[columnSort] !== 'unknown');
       const naoExiste = data.filter((element) => element[columnSort] === 'unknown');
       const sortArr = existe.sort((a, b) => Number(b[columnSort])

@@ -1,9 +1,10 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import App from '../App';
 import AppProvider from '../context/AppProvider';
 import mockData from './helpers/mockData';
+import { act } from 'react-dom/test-utils';
 
 describe('Teste a página da aplicacao', () => {
   beforeEach(() => {
@@ -185,7 +186,109 @@ describe('Teste a página da aplicacao', () => {
       expect(showFilter).toBeInTheDocument();
     });
   });
-  it('testa os botao de excluir apenas um filtro', async () => {
+  it('testa os botao de excluir apenas um filtro "igual a"', async () => {
+    const columnFilter = screen.getByTestId('column-filter');
+    const comparisonFilter = screen.getByTestId('comparison-filter');
+    const valueFilter = screen.getByTestId('value-filter');
+    const filterBtn = screen.getByTestId('button-filter');
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'population');
+      userEvent.selectOptions(comparisonFilter, 'maior que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '100');
+      userEvent.click(filterBtn);
+    });
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'rotation_period');
+      userEvent.selectOptions(comparisonFilter, 'menor que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '20');
+      userEvent.click(filterBtn);
+    });
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'surface_water');
+      userEvent.selectOptions(comparisonFilter, 'igual a')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '0');
+      userEvent.click(filterBtn);
+    });
+
+    await waitFor(() => {
+      const showFilter = screen.getAllByTestId('filter');
+      expect(showFilter).toHaveLength(3);
+    });
+
+    const btnRemove = screen.getAllByRole('button', {
+      name: /x/i
+    });
+    act(() => {
+      userEvent.click(btnRemove[2])
+    });
+    await waitFor(() => {
+      const showFilter = screen.getAllByTestId('filter');
+      expect(showFilter).toHaveLength(2);
+  
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(3);
+    });
+    
+  });
+  it('testa os botao de excluir apenas um filtro "menor que"', async () => {
+    const columnFilter = screen.getByTestId('column-filter');
+    const comparisonFilter = screen.getByTestId('comparison-filter');
+    const valueFilter = screen.getByTestId('value-filter');
+    const filterBtn = screen.getByTestId('button-filter');
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'population');
+      userEvent.selectOptions(comparisonFilter, 'maior que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '100');
+      userEvent.click(filterBtn);
+    });
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'rotation_period');
+      userEvent.selectOptions(comparisonFilter, 'menor que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '20');
+      userEvent.click(filterBtn);
+    });
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'surface_water');
+      userEvent.selectOptions(comparisonFilter, 'igual a')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, '0');
+      userEvent.click(filterBtn);
+    });
+
+    await waitFor(() => {
+      const showFilter = screen.getAllByTestId('filter');
+      expect(showFilter).toHaveLength(3);
+    });
+
+    const btnRemove = screen.getAllByRole('button', {
+      name: /x/i
+    });
+    act(() => {
+      userEvent.click(btnRemove[1])
+    });
+    await waitFor(() => {
+      const showFilter = screen.getAllByTestId('filter');
+      expect(showFilter).toHaveLength(2);
+  
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(2);
+    });
+    
+  });
+  it('testa os botao de excluir todos os filtros', async () => {
     const columnFilter = screen.getByTestId('column-filter');
     const comparisonFilter = screen.getByTestId('comparison-filter');
     const valueFilter = screen.getByTestId('value-filter');
@@ -197,21 +300,88 @@ describe('Teste a página da aplicacao', () => {
       expect(cell).toHaveLength(11);
     });
 
-    userEvent.selectOptions(columnFilter, 'rotation_period');
-    userEvent.selectOptions(comparisonFilter, 'menor que')
-    userEvent.type(valueFilter, 13);
-    userEvent.click(filterBtn);
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'rotation_period');
+      userEvent.selectOptions(comparisonFilter, 'menor que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, 13);
+      userEvent.click(filterBtn);
+    });
+
+    act(() => {
+      userEvent.selectOptions(columnFilter, 'population');
+      userEvent.selectOptions(comparisonFilter, 'maior que')
+      userEvent.clear(valueFilter);
+      userEvent.type(valueFilter, 50000);
+      userEvent.click(filterBtn);
+    });
+    
+    await waitFor(() => {
+      const showFilter = screen.getAllByTestId('filter');
+      expect(showFilter).toHaveLength(2);
+    });
+    const removeAllFilters = screen.getByTestId('button-remove-filters');
+    await waitFor(() => {
+      expect(removeAllFilters).toBeInTheDocument();
+    });
+    act(() => {
+      userEvent.click(removeAllFilters);
+    });
 
     await waitFor(() => {
-      const showFilter = screen.getByTestId('filter');
-      const removeOneFilter = screen.getByRole('button', {
-        name: /x/i,
-      });
-      const removeAllFilters = screen.getByTestId('button-remove-filters');
-      expect(removeOneFilter).toBeInTheDocument();
-      expect(removeAllFilters).toBeInTheDocument();
-      userEvent.click(removeOneFilter);
-      expect(showFilter).not.toBeInTheDocument();
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(11);
+    });
+  });
+  it('testa as ordenacoes ascendentes', async () => {
+    const orderSort = screen.getByTestId('column-sort');
+    const asc = screen.getByTestId('column-sort-input-asc');
+    const sortBtn = screen.getByTestId('column-sort-button');
+    await waitFor(() => {
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(11);
+    });
+    act(() => {
+      userEvent.selectOptions(orderSort, 'rotation_period');
+      userEvent.click(asc);
+      userEvent.click(sortBtn);
+    });
+
+    await waitFor(() => {
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(11);
+      // console.log(cell[1].querySelector('td').innerHTML);
+      const firstPlanetName = cell[1].querySelector('td').innerHTML;
+      expect(firstPlanetName).toBe('Bespin');
+    });
+  });
+  it('testa as ordenacoes descendentes', async () => {
+    const orderSort = screen.getByTestId('column-sort');
+    const desc = screen.getByTestId('column-sort-input-desc');
+    const sortBtn = screen.getByTestId('column-sort-button');
+
+    await waitFor(() => {
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(11);
+    });
+
+    act(() => {
+      userEvent.selectOptions(orderSort, 'rotation_period');
+      userEvent.click(desc);
+      userEvent.click(sortBtn);
+    });
+
+    await waitFor(() => {
+      const table = screen.getByRole('table');
+      const cell = table.querySelectorAll('tr')
+      expect(cell).toHaveLength(11);
+
+      const firstPlanetName = cell[1].querySelector('td').innerHTML;
+      expect(firstPlanetName).toBe('Kamino');
     });
   });
 });
